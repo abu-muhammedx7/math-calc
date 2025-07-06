@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beautiful Calculator</title>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4cc9f0;
+      --dark: #2b2d42;
+      --light: #f8f9fa;
+      --danger: #ef233c;
+      --success: #2ec4b6;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 20px;
+    }
+    
+    .app-container {
+      width: 100%;
+      max-width: 360px;
+      height: 640px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      background: white;
+    }
+    
+    /* Welcome Screen */
+    .welcome-screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+      background: white;
+      transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+      z-index: 10;
+    }
+    
+    .welcome-screen.hidden {
+      transform: translateY(-100%);
+    }
+    
+    .welcome-screen h1 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+    
+    .welcome-screen p {
+      color: var(--dark);
+      margin-bottom: 2.5rem;
+      opacity: 0.8;
+      font-size: 1.1rem;
+      max-width: 80%;
+      line-height: 1.6;
+    }
+    
+    .start-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 16px 40px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+      outline: none;
+    }
+    
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+      background: var(--primary-light);
+    }
+    
+    /* Calculator Screen */
+    .calculator-screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+      background: white;
+    }
+    
+    .calculator-screen.visible {
+      transform: translateY(0);
+    }
+    
+    .display {
+      width: 100%;
+      padding: 1.5rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      text-align: right;
+      border: none;
+      border-radius: 12px;
+      background: #f8f9fa;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+      color: var(--dark);
+      font-weight: 300;
+    }
+    
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      flex: 1;
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      font-size: 1.4rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      background: #f1f3f5;
+      color: var(--dark);
+      user-select: none;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-operator {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-equals {
+      background: var(--success);
+      color: white;
+      grid-column: span 2;
+    }
+    
+    .btn-clear {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-number {
+      background: #e9ecef;
+    }
+    
+    .footer {
+      text-align: center;
+      color: #adb5bd;
+      font-size: 0.9rem;
+      margin-top: auto;
+      padding-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Welcome Screen -->
+    <div class="welcome-screen" id="welcomeScreen">
+      <h1>Calculator Pro</h1>
+      <p>A beautiful, intuitive calculator for all your daily calculations</p>
+      <button class="start-btn" id="startBtn">Start Calculating</button>
+    </div>
+    
+    <!-- Calculator Screen -->
+    <div class="calculator-screen" id="calculatorScreen">
+      <input type="text" class="display" id="display" readonly value="0">
+      
+      <div class="buttons-grid" id="buttonsContainer">
+        <!-- Buttons will be added by JavaScript -->
+      </div>
+      
+      <div class="footer">
+        © 2025 Calculator Pro
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const welcomeScreen = document.getElementById('welcomeScreen');
+      const calculatorScreen = document.getElementById('calculatorScreen');
+      const startBtn = document.getElementById('startBtn');
+      const display = document.getElementById('display');
+      const buttonsContainer = document.getElementById('buttonsContainer');
+      
+      // Calculator buttons
+      const buttons = [
+        { text: 'C', class: 'btn-clear' },
+        { text: '⌫', class: 'btn-operator' },
+        { text: '%', class: 'btn-operator' },
+        { text: '/', class: 'btn-operator' },
+        { text: '7', class: 'btn-number' },
+        { text: '8', class: 'btn-number' },
+        { text: '9', class: 'btn-number' },
+        { text: '*', class: 'btn-operator' },
+        { text: '4', class: 'btn-number' },
+        { text: '5', class: 'btn-number' },
+        { text: '6', class: 'btn-number' },
+        { text: '-', class: 'btn-operator' },
+        { text: '1', class: 'btn-number' },
+        { text: '2', class: 'btn-number' },
+        { text: '3', class: 'btn-number' },
+        { text: '+', class: 'btn-operator' },
+        { text: '0', class: 'btn-number' },
+        { text: '.', class: 'btn-number' },
+        { text: '=', class: 'btn-equals' }
+      ];
+      
+      // Initialize calculator
+      startBtn.addEventListener('click', function() {
+        welcomeScreen.classList.add('hidden');
+        calculatorScreen.classList.add('visible');
+        initializeCalculator();
+      });
+      
+      function initializeCalculator() {
+        // Create buttons
+        buttons.forEach(button => {
+          const btn = document.createElement('button');
+          btn.className = `btn ${button.class}`;
+          btn.textContent = button.text;
+          
+          // Add click handler
+          btn.addEventListener('click', () => handleButtonClick(button.text));
+          
+          buttonsContainer.appendChild(btn);
+        });
+      }
+      
+      // Handle button clicks
+      function handleButtonClick(value) {
+        const currentValue = display.value === '0' ? '' : display.value;
+        
+        if (value === '=') {
+          try {
+            display.value = eval(display.value.replace('%', '/100*'));
+          } catch (error) {
+            display.value = 'Error';
+          }
+        } 
+        else if (value === 'C') {
+          display.value = '0';
+        }
+        else if (value === '⌫') {
+          display.value = display.value.slice(0, -1) || '0';
+        }
+        else {
+          display.value = currentValue + value;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
